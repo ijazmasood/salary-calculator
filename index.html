@@ -1,0 +1,1002 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Salary Calculator</title>
+        <style>
+            :root {
+                --bg: #0f172a;
+                --card: #111827;
+                --muted: #94a3b8;
+                --text: #e5e7eb;
+                --primary: #38bdf8;
+                --primary-2: #22d3ee;
+                --accent: #a78bfa;
+                --danger: #f87171;
+                --success: #34d399;
+                --border: #1f2937;
+                --shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            body {
+                margin: 0;
+                font-family:
+                    "Inter",
+                    "Segoe UI",
+                    system-ui,
+                    -apple-system,
+                    sans-serif;
+                background: radial-gradient(1200px 600px at 10% -10%, #1e293b 0, #0f172a 50%, #0b1020 100%);
+                color: var(--text);
+                min-height: 100vh;
+            }
+
+            .container {
+                max-width: 1100px;
+                margin: 0 auto;
+                padding: 32px 20px 60px;
+            }
+
+            header {
+                display: flex;
+                gap: 12px;
+                align-items: center;
+                justify-content: flex-start;
+                margin-bottom: 24px;
+            }
+
+            .section {
+                padding: 12px 0 32px;
+                border-bottom: 1px dashed rgba(255, 255, 255, 0.15);
+                margin-bottom: 8px;
+            }
+            .section:last-child {
+                border-bottom: none;
+            }
+
+            header h1 {
+                margin: 0;
+                font-size: 1.4rem;
+                letter-spacing: 0.3px;
+            }
+
+            header p {
+                margin: 0;
+                color: var(--muted);
+            }
+
+            .grid {
+                display: grid;
+                grid-template-columns: repeat(12, 1fr);
+                gap: 18px;
+            }
+
+            .card {
+                background: linear-gradient(145deg, rgba(17, 24, 39, 0.9), rgba(15, 23, 42, 0.95));
+                border: 1px solid var(--border);
+                border-radius: 18px;
+                padding: 22px;
+                box-shadow: var(--shadow);
+            }
+
+            /* Salary preview specific styling */
+            #salaryPreview {
+                background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+                border: 1px solid rgba(255, 255, 255, 0.04);
+            }
+
+            #salaryPreview .preview-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 12px;
+                margin-bottom: 10px;
+            }
+            #salaryPreview .preview-header .muted {
+                color: var(--muted);
+                font-size: 0.9rem;
+            }
+
+            .preview-summary {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+                margin-bottom: 12px;
+            }
+            .preview-summary .box {
+                background: rgba(255, 255, 255, 0.03);
+                border: 1px solid rgba(255, 255, 255, 0.03);
+                padding: 10px;
+                border-radius: 10px;
+            }
+            .preview-summary .box h4 {
+                margin: 0 0 6px;
+                color: #cfeffd;
+                font-size: 0.9rem;
+            }
+
+            /* Make preview table rows slightly smaller */
+            #salaryPreview table th,
+            #salaryPreview table td {
+                padding: 8px;
+                font-size: 0.9rem;
+            }
+
+            @media (max-width: 900px) {
+                .preview-summary {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            .section-title {
+                margin: 0 0 12px;
+                font-size: 1.1rem;
+                color: #e2e8f0;
+            }
+
+            label {
+                display: block;
+                font-size: 0.88rem;
+                color: var(--muted);
+                margin-bottom: 6px;
+            }
+
+            input,
+            select,
+            textarea {
+                width: 100%;
+                padding: 11px 12px;
+                border-radius: 12px;
+                border: 1px solid #1f2a44;
+                background: #0b1220;
+                color: var(--text);
+                outline: none;
+            }
+
+            input:focus,
+            select:focus,
+            textarea:focus {
+                border-color: var(--primary);
+                box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+            }
+
+            /* Make the month picker icon visible on dark backgrounds */
+            input[type="month"] {
+                color: var(--text);
+            }
+
+            /* WebKit browsers (Chrome, Edge, Safari) - brighten/invert the default icon */
+            input[type="month"]::-webkit-calendar-picker-indicator {
+                filter: invert(1) brightness(2) contrast(1.1);
+                opacity: 0.95;
+                cursor: pointer;
+            }
+
+            /* Firefox often follows text color for the icon; ensure it uses light color */
+            input[type="month"]::-moz-focus-inner {
+                color: var(--text);
+            }
+
+            textarea {
+                resize: vertical;
+                min-height: 42px;
+            }
+
+            .col-12 {
+                grid-column: span 12;
+            }
+
+            .col-6 {
+                grid-column: span 6;
+            }
+
+            .muted {
+                color: var(--muted);
+                font-size: 0.85rem;
+            }
+
+            .row {
+                display: flex;
+                gap: 12px;
+                flex-wrap: wrap;
+            }
+
+            .row .btn {
+                flex: 1;
+                min-width: 180px;
+            }
+
+            .btn {
+                background: linear-gradient(135deg, var(--primary), var(--primary-2));
+                color: #07111f;
+                border: none;
+                padding: 12px 16px;
+                border-radius: 12px;
+                font-weight: 600;
+                cursor: pointer;
+                transition:
+                    transform 0.15s ease,
+                    box-shadow 0.15s ease;
+            }
+
+            .btn.secondary {
+                background: #111827;
+                color: var(--text);
+                border: 1px solid #23324f;
+            }
+
+            .btn.ghost {
+                background: transparent;
+                border: 1px dashed #334155;
+                color: var(--muted);
+            }
+
+            .btn:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 8px 18px rgba(14, 165, 233, 0.2);
+            }
+
+            .badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 10px 36px;
+                border-radius: 14px;
+                background: rgba(167, 139, 250, 0.15);
+                color: #c4b5fd;
+            }
+
+            .badge h4 {
+                margin: 0px;
+            }
+
+            .toggle {
+                display: none;
+            }
+
+            #reportView {
+                display: none;
+            }
+
+            .report {
+                background: #ffffff;
+                color: #0f172a;
+                border-radius: 14px;
+                padding: 28px;
+                max-width: 900px;
+                margin: 0 auto;
+            }
+
+            .report h2,
+            .report h3,
+            .report h4 {
+                margin: 0;
+            }
+
+            .report-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                gap: 16px;
+                margin-bottom: 18px;
+                border-bottom: 2px solid #e2e8f0;
+                padding-bottom: 12px;
+            }
+            .report-header p {
+                margin: 0px;
+            }
+
+            .report-header .title,
+            .report-header .meta {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .report-header .meta {
+                text-align: right;
+                font-size: 0.85rem;
+                color: #475569;
+            }
+
+            .report-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 18px;
+                margin-bottom: 16px;
+            }
+
+            .report-card {
+                border: 1px solid #e2e8f0;
+                border-radius: 12px;
+                padding: 12px 14px;
+                background: #f8fafc;
+            }
+
+            .report-card p {
+                margin: 4px 0;
+                font-size: 0.9rem;
+                color: #334155;
+            }
+
+            /* Table base and visual styling */
+            table {
+                width: 100%;
+                border-collapse: separate;
+                border-spacing: 0;
+                margin: 12px 0 18px;
+                font-size: 0.92rem;
+                border: 1px solid #e2e8f0;
+                border-radius: 10px;
+                overflow: hidden;
+                background: #ffffff;
+            }
+
+            /* Cells */
+            th,
+            td {
+                padding: 12px 14px;
+                text-align: left;
+                border-bottom: 1px solid #e6eef6;
+            }
+
+            /* Header styling: stronger contrast, subtle gradient and uppercase labels */
+            thead th {
+                color: #0f172a;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.4px;
+                font-size: 0.85rem;
+                border-bottom: 2px solid #cfe0ee;
+            }
+
+            /* Right-aligned monetary column already has .amount; keep alignment and ensure consistent padding */
+            .amount {
+                text-align: right;
+                white-space: nowrap;
+                font-variant-numeric: tabular-nums;
+                padding-right: 16px;
+            }
+
+            /* Row striping and hover */
+            tbody tr:nth-child(odd) {
+                background: #ffffff;
+            }
+            tbody tr:nth-child(even) {
+                background: #fbfdff;
+            }
+            tbody tr:hover {
+                background: #f3f9ff;
+            }
+
+            /* Selected row (use JS to toggle `selected` class if needed) */
+            tbody tr.selected {
+                background: #e6f0ff;
+                outline: 2px solid rgba(14, 165, 233, 0.12);
+            }
+
+            /* Make sure header and borders print clearly */
+            @media print {
+                table,
+                th,
+                td {
+                    border-color: #bbbbbb !important;
+                }
+                thead th {
+                    background: #f1f5f9 !important;
+                    print-color-adjust: exact;
+                    -webkit-print-color-adjust: exact;
+                }
+            }
+
+            /* Dark-mode compatible table styling for the in-form preview
+               Keeps the report table light while making preview tables match the dark card */
+            #salaryPreview table {
+                background: transparent;
+                border: 1px solid rgba(255, 255, 255, 0.04);
+                border-radius: 10px;
+                overflow: hidden;
+            }
+
+            #salaryPreview thead th {
+                background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+                color: var(--text);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+                font-weight: 700;
+            }
+
+            #salaryPreview th,
+            #salaryPreview td {
+                border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+                color: var(--text);
+            }
+
+            #salaryPreview tbody tr:nth-child(odd) {
+                background: transparent;
+            }
+            #salaryPreview tbody tr:nth-child(even) {
+                background: rgba(255, 255, 255, 0.01);
+            }
+            #salaryPreview tbody tr:hover {
+                background: rgba(255, 255, 255, 0.03);
+            }
+
+            #salaryPreview td.amount {
+                color: var(--text);
+                font-weight: 600;
+            }
+
+            .amount {
+                text-align: right;
+                white-space: nowrap;
+                font-variant-numeric: tabular-nums;
+            }
+
+            .summary {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 12px;
+            }
+
+            .summary .box {
+                background: #f8fafc;
+                border: 1px solid #e2e8f0;
+                border-radius: 12px;
+                padding: 12px;
+            }
+
+            .summary .box h4 {
+                margin: 0 0 6px;
+                font-size: 0.95rem;
+            }
+
+            .net {
+                font-size: 1.2rem;
+                color: #0f766e;
+                font-weight: 700;
+            }
+
+            .signature {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 24px;
+                margin-top: 64px;
+            }
+
+            .signature .line {
+                border-top: 1px solid #94a3b8;
+                margin-top: 32px;
+                padding-top: 6px;
+                font-size: 0.85rem;
+                color: #64748b;
+                text-align: center;
+            }
+
+            @media (max-width: 900px) {
+                .col-6 {
+                    grid-column: span 12;
+                }
+
+                header {
+                    flex-direction: column;
+                }
+
+                .badge {
+                    width: 100%;
+                    text-align: center;
+                    display: block;
+                }
+
+                .report-grid,
+                .summary,
+                .signature {
+                    grid-template-columns: 1fr;
+                }
+                .report-header {
+                    flex-direction: column;
+                    align-items: flex-start;
+                }
+                .report-header .meta {
+                    text-align: left;
+                }
+            }
+
+            @media print {
+                body {
+                    background: #ffffff;
+                }
+                .container,
+                #formView,
+                .btn-row {
+                    display: none !important;
+                }
+                #reportView {
+                    display: block !important;
+                }
+                .report {
+                    box-shadow: none;
+                    border-radius: 0;
+                    padding: 0;
+                }
+            }
+
+            /* Attribution / footer */
+            .attribution {
+                text-align: center;
+                margin-top: 18px;
+                font-size: 0.9rem;
+                color: var(--muted);
+            }
+            .attribution .heart {
+                color: #ef4444;
+                margin: 0 6px;
+                font-size: 1rem;
+                vertical-align: middle;
+            }
+            /* Override for printable report (darker text) */
+            .report .attribution {
+                color: #6b7280;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container" id="formView">
+            <header>
+                <span class="badge">
+                    <h4>Salary Calculator</h4>
+                </span>
+                <p>Fill details, calculate deductions/additions, preview the A4 report, and download PDF.</p>
+            </header>
+
+            <form id="salaryForm" class="card">
+                <div class="grid">
+                    <!-- Section 1: Company / Base info -->
+                    <div class="col-12 section">
+                        <h3 class="section-title">Basic Info</h3>
+                        <div class="grid">
+                            <div class="col-6">
+                                <label for="companyName">Company name</label>
+                                <input id="companyName" type="text" placeholder="ABC Pvt Ltd" required />
+                            </div>
+                            <div class="col-6">
+                                <label for="employeeName">Employee full name</label>
+                                <input id="employeeName" type="text" placeholder="Full name" required />
+                            </div>
+
+                            <div class="col-6">
+                                <label for="totalSalary">Total salary</label>
+                                <input id="totalSalary" type="number" min="0" step="0.01" placeholder="0.00" required />
+                            </div>
+                            <div class="col-6">
+                                <label for="currency">Currency</label>
+                                <select id="currency" required>
+                                    <option value="PKR" selected>PKR - Pakistani Rupee</option>
+                                    <option value="USD">USD - US Dollar</option>
+                                    <option value="EUR">EUR - Euro</option>
+                                    <option value="GBP">GBP - British Pound</option>
+                                    <option value="AED">AED - UAE Dirham</option>
+                                    <option value="SAR">SAR - Saudi Riyal</option>
+                                    <option value="INR">INR - Indian Rupee</option>
+                                    <option value="CNY">CNY - Chinese Yuan</option>
+                                    <option value="JPY">JPY - Japanese Yen</option>
+                                    <option value="CAD">CAD - Canadian Dollar</option>
+                                    <option value="AUD">AUD - Australian Dollar</option>
+                                    <option value="SGD">SGD - Singapore Dollar</option>
+                                </select>
+                            </div>
+
+                            <div class="col-6">
+                                <label for="monthYear">For which month & year</label>
+                                <input id="monthYear" type="month" required />
+                            </div>
+                            <div class="col-6">
+                                <label for="workingHours">Working hours per day</label>
+                                <input id="workingHours" type="number" min="1" step="0.1" value="8" required />
+                            </div>
+
+                            <div class="col-6">
+                                <label for="securityAmount">Security amount (will be deducted if entered)</label>
+                                <input id="securityAmount" type="number" min="0" step="0.01" placeholder="0.00" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Deductions -->
+                    <div class="col-12 section">
+                        <h3 class="section-title">Deductions</h3>
+                        <div class="grid">
+                            <div class="col-6">
+                                <label for="totalLeaves">Total leaves (optional)</label>
+                                <input id="totalLeaves" type="number" min="0" step="0.01" placeholder="0" />
+                                <p class="muted">1 leave = working hours per day</p>
+                            </div>
+                            <div class="col-6">
+                                <label for="shortHours">Total short hours (optional)</label>
+                                <input id="shortHours" type="number" min="0" step="0.01" placeholder="0" />
+                            </div>
+
+                            <div class="col-6">
+                                <label for="otherDeductionDesc">Other deduction description</label>
+                                <input id="otherDeductionDesc" type="text" placeholder="Fine, maintenance, etc." />
+                            </div>
+                            <div class="col-6">
+                                <label for="otherDeductionAmount">Other deduction amount</label>
+                                <input id="otherDeductionAmount" type="number" min="0" step="0.01" placeholder="0.00" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Additions -->
+                    <div class="col-12 section">
+                        <h3 class="section-title">Additions</h3>
+                        <div class="grid">
+                            <div class="col-6">
+                                <label for="extraHours">Extra hours worked (optional)</label>
+                                <input id="extraHours" type="number" min="0" step="0.01" placeholder="0" />
+                            </div>
+                            <div class="col-6">
+                                <label for="otherAdditionAmount">Other addition amount</label>
+                                <input id="otherAdditionAmount" type="number" min="0" step="0.01" placeholder="0.00" />
+                            </div>
+                            <div class="col-12">
+                                <label for="otherAdditionDesc">Other addition description</label>
+                                <input id="otherAdditionDesc" type="text" placeholder="TA/DA, allowance, rent, etc." />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 section">
+                        <div class="row btn-row">
+                            <button class="btn" type="submit">Calculate & Preview</button>
+                            <button class="btn secondary" type="button" id="resetForm">Clear form</button>
+                            <button class="btn ghost" type="button" id="showPreview">Show Preview</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div id="salaryPreview" class="card" style="display: none; margin-top: 12px">
+                <div class="preview-header">
+                    <h3 class="section-title">Calculation Preview</h3>
+                    <div class="muted">Quick view before generating the final report</div>
+                </div>
+
+                <div class="preview-summary">
+                    <div class="box">
+                        <h4>Total deductions</h4>
+                        <div id="pTotalDeductions" class="amount"></div>
+                    </div>
+                    <div class="box">
+                        <h4>Total additions</h4>
+                        <div id="pTotalAdditions" class="amount"></div>
+                    </div>
+                    <div class="box">
+                        <h4>Net payable</h4>
+                        <div id="pNetPay" class="net amount"></div>
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th class="amount">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="previewRows"></tbody>
+                </table>
+
+                <div style="text-align: right; margin-top: 10px">
+                    <button class="btn" id="applyPreview">Use Preview / Finalize</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attribution shown in edit/form view -->
+        <div class="container" style="max-width: 1100px">
+            <div class="attribution">Made with <span class="heart">♥</span> by <a href="https://github.com/ijazmasood" target="_blank" rel="noopener" style="color: var(--primary); text-decoration: none">ijazmasood</a></div>
+        </div>
+
+        <div class="container" id="reportView">
+            <div class="card">
+                <div class="row btn-row" style="margin-bottom: 16px">
+                    <button class="btn secondary" type="button" id="editReport">Back to edit</button>
+                    <button class="btn ghost" type="button" id="newReport">New calculation</button>
+                    <button class="btn" type="button" id="downloadPdf">Download PDF</button>
+                </div>
+
+                <div id="reportArea" class="report">
+                    <div class="report-header">
+                        <div class="title">
+                            <h2 id="rCompany">Company</h2>
+                            <h3>Salary Report</h3>
+                        </div>
+                        <div class="meta">
+                            <div><strong>Employee:</strong> <span id="rEmployee"></span></div>
+                            <div><strong>Generated:</strong> <span id="rDate"></span></div>
+                            <p id="rPeriod" class="muted"></p>
+                        </div>
+                    </div>
+
+                    <div class="report-grid">
+                        <div class="report-card">
+                            <h4>Rates</h4>
+                            <p>Month days: <strong id="rDays"></strong></p>
+                            <p>Working hours/day: <strong id="rHours"></strong></p>
+                            <p>Daily rate: <strong id="rDaily"></strong></p>
+                            <p>Hourly rate: <strong id="rHourly"></strong></p>
+                        </div>
+                        <div class="report-card">
+                            <h4>Salary Base</h4>
+                            <p>Total salary: <strong id="rTotalSalary"></strong></p>
+                            <p>Security amount: <strong id="rSecurity"></strong></p>
+                            <p>Currency: <strong id="rCurrency"></strong></p>
+                        </div>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th class="amount">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportRows"></tbody>
+                    </table>
+
+                    <div class="summary">
+                        <div class="box">
+                            <h4>Total deductions</h4>
+                            <div id="rTotalDeductions" class="amount"></div>
+                        </div>
+                        <div class="box">
+                            <h4>Total additions</h4>
+                            <div id="rTotalAdditions" class="amount"></div>
+                        </div>
+                        <div class="box">
+                            <h4>Net payable</h4>
+                            <div id="rNetPay" class="net amount"></div>
+                        </div>
+                    </div>
+
+                    <div class="signature">
+                        <div>
+                            <div class="line">Prepared by</div>
+                        </div>
+                        <div>
+                            <div class="line">Approved by</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+        <script>
+            const salaryForm = document.getElementById("salaryForm");
+            const reportView = document.getElementById("reportView");
+            const formView = document.getElementById("formView");
+            const reportRows = document.getElementById("reportRows");
+
+            const currencyFormat = (value, currency) => {
+                if (Number.isNaN(value)) return "-";
+                return new Intl.NumberFormat("en-US", {
+                    style: "currency",
+                    currency,
+                    maximumFractionDigits: 2,
+                }).format(value);
+            };
+
+            const safeNumber = (value) => {
+                const parsed = parseFloat(value);
+                return Number.isFinite(parsed) ? parsed : 0;
+            };
+
+            const monthInput = document.getElementById("monthYear");
+            const now = new Date();
+            const defaultMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+            monthInput.value = defaultMonth;
+
+            document.getElementById("resetForm").addEventListener("click", () => {
+                salaryForm.reset();
+                monthInput.value = defaultMonth;
+                document.getElementById("workingHours").value = 8;
+                document.getElementById("currency").value = "PKR";
+                document.getElementById("salaryPreview").style.display = "none";
+            });
+
+            document.getElementById("editReport").addEventListener("click", () => {
+                reportView.style.display = "none";
+                formView.style.display = "block";
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            });
+
+            document.getElementById("newReport").addEventListener("click", () => {
+                salaryForm.reset();
+                monthInput.value = defaultMonth;
+                document.getElementById("workingHours").value = 8;
+                document.getElementById("currency").value = "PKR";
+                reportView.style.display = "none";
+                formView.style.display = "block";
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            });
+
+            document.getElementById("downloadPdf").addEventListener("click", () => {
+                const reportArea = document.getElementById("reportArea");
+                const emp = document.getElementById("employeeName").value.trim() || "employee";
+                const mv = document.getElementById("monthYear").value || "period";
+                const filename = `salary-${emp.replace(/\s+/g, "-")}-${mv}.pdf`;
+                const options = {
+                    margin: [10, 10, 10, 10],
+                    filename,
+                    image: { type: "jpeg", quality: 0.98 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+                };
+                html2pdf().set(options).from(reportArea).save();
+            });
+
+            // in-form preview button
+            document.getElementById("showPreview").addEventListener("click", () => {
+                // reuse calculation logic below but don't switch views
+                const data = collectAndCompute();
+                renderPreview(data);
+                document.getElementById("salaryPreview").style.display = "block";
+                window.scrollTo({ top: document.getElementById("salaryPreview").offsetTop - 20, behavior: "smooth" });
+            });
+
+            // collect values and compute derived amounts
+            function collectAndCompute() {
+                const companyName = document.getElementById("companyName").value.trim();
+                const employeeName = document.getElementById("employeeName").value.trim();
+                const totalSalary = safeNumber(document.getElementById("totalSalary").value);
+                const currency = document.getElementById("currency").value;
+                const workingHours = Math.max(1, safeNumber(document.getElementById("workingHours").value));
+                const securityAmount = safeNumber(document.getElementById("securityAmount").value);
+                const totalLeaves = safeNumber(document.getElementById("totalLeaves").value);
+                const shortHours = safeNumber(document.getElementById("shortHours").value);
+                const otherDeductionDesc = document.getElementById("otherDeductionDesc").value.trim();
+                const otherDeductionAmount = safeNumber(document.getElementById("otherDeductionAmount").value);
+                const extraHours = safeNumber(document.getElementById("extraHours").value);
+                const otherAdditionDesc = document.getElementById("otherAdditionDesc").value.trim();
+                const otherAdditionAmount = safeNumber(document.getElementById("otherAdditionAmount").value);
+                const monthYearValue = monthInput.value;
+
+                const [year, month] = monthYearValue.split("-").map(Number);
+                const daysInMonth = new Date(year, month, 0).getDate();
+                const dailyRate = daysInMonth ? totalSalary / daysInMonth : 0;
+                const hourlyRate = workingHours ? dailyRate / workingHours : 0;
+
+                const leaveDeduction = totalLeaves * dailyRate;
+                const shortHoursDeduction = shortHours * hourlyRate;
+                // security is deducted if entered; otherwise zero
+                const securityDeduction = securityAmount;
+                const totalDeductions = leaveDeduction + shortHoursDeduction + otherDeductionAmount + securityDeduction;
+
+                const extraHoursAddition = extraHours * hourlyRate;
+                const totalAdditions = extraHoursAddition + otherAdditionAmount;
+
+                const netPay = totalSalary - totalDeductions + totalAdditions;
+
+                return {
+                    companyName,
+                    employeeName,
+                    totalSalary,
+                    currency,
+                    workingHours,
+                    securityAmount,
+                    totalLeaves,
+                    shortHours,
+                    otherDeductionDesc,
+                    otherDeductionAmount,
+                    extraHours,
+                    otherAdditionDesc,
+                    otherAdditionAmount,
+                    monthYearValue,
+                    daysInMonth,
+                    dailyRate,
+                    hourlyRate,
+                    leaveDeduction,
+                    shortHoursDeduction,
+                    securityDeduction,
+                    totalDeductions,
+                    extraHoursAddition,
+                    totalAdditions,
+                    netPay,
+                };
+            }
+
+            function renderRowsTo(tbody, data) {
+                tbody.innerHTML = "";
+                const addRow = (label, amount, isDeduction = false) => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `<td>${label}</td><td class="amount">${isDeduction ? "-" : ""}${currencyFormat(amount, data.currency)}</td>`;
+                    tbody.appendChild(row);
+                };
+
+                addRow("Base salary", data.totalSalary, false);
+                if (data.totalLeaves > 0) addRow(`Leaves (${data.totalLeaves} days @ ${currencyFormat(data.dailyRate, data.currency)}/day)`, data.leaveDeduction, true);
+                if (data.shortHours > 0) addRow(`Short hours (${data.shortHours} hrs @ ${currencyFormat(data.hourlyRate, data.currency)}/hr)`, data.shortHoursDeduction, true);
+                if (data.otherDeductionAmount > 0) addRow(data.otherDeductionDesc || "Other deduction", data.otherDeductionAmount, true);
+                if (data.securityDeduction > 0) addRow("Security deduction", data.securityDeduction, true);
+                if (data.extraHours > 0) addRow(`Extra hours (${data.extraHours} hrs @ ${currencyFormat(data.hourlyRate, data.currency)}/hr)`, data.extraHoursAddition, false);
+                if (data.otherAdditionAmount > 0) addRow(data.otherAdditionDesc || "Other addition", data.otherAdditionAmount, false);
+            }
+
+            function renderPreview(data) {
+                // keep last preview data for apply action
+                window._lastPreviewData = data;
+                document.getElementById("previewRows").innerHTML = "";
+                renderRowsTo(document.getElementById("previewRows"), data);
+                document.getElementById("pTotalDeductions").textContent = currencyFormat(data.totalDeductions, data.currency);
+                document.getElementById("pTotalAdditions").textContent = currencyFormat(data.totalAdditions, data.currency);
+                document.getElementById("pNetPay").textContent = currencyFormat(data.netPay, data.currency);
+                // also update report summary so preview and report stay in sync
+                document.getElementById("rTotalDeductions").textContent = currencyFormat(data.totalDeductions, data.currency);
+                document.getElementById("rTotalAdditions").textContent = currencyFormat(data.totalAdditions, data.currency);
+                document.getElementById("rNetPay").textContent = currencyFormat(data.netPay, data.currency);
+            }
+
+            // apply preview to final report (uses last preview data)
+            document.getElementById("applyPreview").addEventListener("click", () => {
+                const data = window._lastPreviewData;
+                if (!data) return;
+                document.getElementById("rCompany").textContent = data.companyName || "Company";
+                document.getElementById("rEmployee").textContent = data.employeeName || "Employee";
+                document.getElementById("rPeriod").textContent = `Period: ${data.monthYearValue}`;
+                document.getElementById("rDate").textContent = new Date().toLocaleString();
+                document.getElementById("rDays").textContent = data.daysInMonth;
+                document.getElementById("rHours").textContent = data.workingHours;
+                document.getElementById("rDaily").textContent = currencyFormat(data.dailyRate, data.currency);
+                document.getElementById("rHourly").textContent = currencyFormat(data.hourlyRate, data.currency);
+                document.getElementById("rTotalSalary").textContent = currencyFormat(data.totalSalary, data.currency);
+                document.getElementById("rSecurity").textContent = currencyFormat(data.securityAmount, data.currency);
+                document.getElementById("rCurrency").textContent = data.currency;
+
+                renderRowsTo(reportRows, data);
+                document.getElementById("rTotalDeductions").textContent = currencyFormat(data.totalDeductions, data.currency);
+                document.getElementById("rTotalAdditions").textContent = currencyFormat(data.totalAdditions, data.currency);
+                document.getElementById("rNetPay").textContent = currencyFormat(data.netPay, data.currency);
+
+                formView.style.display = "none";
+                reportView.style.display = "block";
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            });
+
+            salaryForm.addEventListener("submit", (event) => {
+                event.preventDefault();
+                const data = collectAndCompute();
+
+                document.getElementById("rCompany").textContent = data.companyName || "Company";
+                document.getElementById("rEmployee").textContent = data.employeeName || "Employee";
+                document.getElementById("rPeriod").textContent = `Period: ${data.monthYearValue}`;
+                document.getElementById("rDate").textContent = new Date().toLocaleString();
+                document.getElementById("rDays").textContent = data.daysInMonth;
+                document.getElementById("rHours").textContent = data.workingHours;
+                document.getElementById("rDaily").textContent = currencyFormat(data.dailyRate, data.currency);
+                document.getElementById("rHourly").textContent = currencyFormat(data.hourlyRate, data.currency);
+                document.getElementById("rTotalSalary").textContent = currencyFormat(data.totalSalary, data.currency);
+                document.getElementById("rSecurity").textContent = currencyFormat(data.securityAmount, data.currency);
+                document.getElementById("rCurrency").textContent = data.currency;
+
+                renderRowsTo(reportRows, data);
+
+                document.getElementById("rTotalDeductions").textContent = currencyFormat(data.totalDeductions, data.currency);
+                document.getElementById("rTotalAdditions").textContent = currencyFormat(data.totalAdditions, data.currency);
+                document.getElementById("rNetPay").textContent = currencyFormat(data.netPay, data.currency);
+
+                // also populate preview (hidden in form) so download shows same data
+                renderPreview(data);
+
+                formView.style.display = "none";
+                reportView.style.display = "block";
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            });
+        </script>
+    </body>
+</html>
